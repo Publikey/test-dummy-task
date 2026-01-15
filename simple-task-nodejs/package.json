@@ -1,0 +1,19 @@
+{
+  "name": "simple-task-nodejs",
+  "version": "1.0.0",
+  "description": "Simple one-shot task for runqy-worker (Node.js)",
+  "main": "main.ts",
+  "scripts": {
+    "start": "ts-node main.ts",
+    "build": "tsc",
+    "start:compiled": "node dist/main.js"
+  },
+  "dependencies": {
+    "runqy-task": "file:../../runqy-node"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0",
+    "ts-node": "^10.9.0"
+  }
+}

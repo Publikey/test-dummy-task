@@ -20,6 +20,21 @@ dist/
 .vscode/
 *.swp
 
+# Node.js
+node_modules/
+dist/
+*.js
+*.d.ts
+*.js.map
+package-lock.json
+
+# Go
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
 # Claude
 .claude/
 CLAUDE.md
