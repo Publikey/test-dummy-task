@@ -21,4 +21,3 @@ def process(payload: dict) -> dict:
 
 if __name__ == "__main__":
     run_once()
-
