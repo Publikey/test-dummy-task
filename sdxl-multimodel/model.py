@@ -217,6 +217,7 @@ class ModelManager:
             pipeline = StableDiffusionXLPipeline.from_single_file(
                 path,
                 torch_dtype=torch.float16,
+                use_safetensors=True,
             )
         else:
             raise ValueError(f"Unsupported pipeline type: {config.pipeline}")
