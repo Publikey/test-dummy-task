@@ -22,6 +22,7 @@ from diffusers.utils import load_image
 
 from sd_embed.embedding_funcs import get_weighted_text_embeddings_sdxl
 from config import get_all_model_names, resolve_model_path, get_model_config, download_all_models
+from runqy_task import task, load, run
 
 MAX_SEED = np.iinfo(np.int32).max
 
@@ -481,80 +482,22 @@ class Model:
         return img_b64
 
 
-if __name__ == "__main__":
-    # Initialize model
+@load
+def setup():
+    """Load the SDXL model manager (runs once before ready signal)."""
+    logging.info("Initializing SDXL Multi-Model...")
     model = Model()
     model.load()
+    logging.info("SDXL Multi-Model ready!")
+    return {"model": model}
 
-    print("\n=== SDXL Multi-Model Interactive Tester ===")
-    print(f"Available models: {model.model_manager.available_models}")
-    print("Commands: 'quit' to exit, 'models' to list models\n")
 
-    while True:
-        try:
-            # Get model name
-            model_name = input("Model name (or 'quit'): ").strip()
-            if model_name.lower() == 'quit':
-                break
-            if model_name.lower() == 'models':
-                print(f"Available: {model.model_manager.available_models}")
-                continue
+@task
+def process(payload: dict, ctx: dict) -> dict:
+    """Process an image generation task."""
+    model = ctx["model"]
+    return model.predict(payload)
 
-            # Get prompt
-            prompt = input("Prompt: ").strip()
-            if not prompt:
-                print("Prompt cannot be empty")
-                continue
 
-            # Build test input
-            test_input = {
-                "id": "local-test",
-                "webhook_url": "",  # No webhook for local test
-                "model_name": model_name,
-                "prompt": prompt,
-                "negative_prompt": input("Negative prompt (optional): ").strip() or "",
-                "width": int(input("Width [1024]: ").strip() or 1024),
-                "height": int(input("Height [1024]: ").strip() or 1024),
-                "num_steps": int(input("Steps [28]: ").strip() or 28),
-                "guidance_scale": float(input("Guidance [6]: ").strip() or 6),
-                "seed": int(input("Seed (empty=random): ").strip() or 0) or None,
-            }
-
-            # img2img options
-            img_path = input("Source image path/URL for img2img (empty=t2i): ").strip()
-            if img_path:
-                # Check if it's a URL
-                if img_path.startswith(("http://", "https://")):
-                    test_input["img_url"] = img_path
-                    test_input["strength"] = float(input("Strength [0.75]: ").strip() or 0.75)
-                elif os.path.exists(img_path):
-                    # Read local image and convert to base64
-                    with open(img_path, "rb") as f:
-                        img_b64 = base64.b64encode(f.read()).decode("utf-8")
-                    test_input["img_base64"] = img_b64
-                    test_input["strength"] = float(input("Strength [0.75]: ").strip() or 0.75)
-                else:
-                    print(f"Image not found: {img_path}, proceeding with t2i")
-
-            # Run prediction
-            print("\nGenerating...")
-            result = model.predict(test_input)
-
-            # Save output locally
-            if result["data"] and result["data"][0]["result"]:
-                filename = f"output_{int(time.time())}.jpg"
-                img_data = base64.b64decode(result["data"][0]["result"])
-                with open(filename, "wb") as f:
-                    f.write(img_data)
-                print(f"Saved: {filename} (seed: {result['data'][0]['seed']})")
-
-            if result["errors"]:
-                print(f"Errors: {result['errors']}")
-
-        except KeyboardInterrupt:
-            print("\nExiting...")
-            break
-        except Exception as e:
-            print(f"Error: {e}")
-
-    print("Done!")
+if __name__ == "__main__":
+    run()

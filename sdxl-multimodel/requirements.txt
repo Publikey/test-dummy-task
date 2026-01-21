@@ -16,3 +16,4 @@ safetensors
 fastapi
 pyyaml
 git+https://github.com/xhinker/sd_embed.git@main
+runqy-task
