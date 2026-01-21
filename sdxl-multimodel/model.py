@@ -496,7 +496,11 @@ def setup():
 def process(payload: dict, ctx: dict) -> dict:
     """Process an image generation task."""
     model = ctx["model"]
-    return model.predict(payload)
+    # Extract model_input and merge with top-level fields (id, webhook_url)
+    model_input = payload.get("model_input", {})
+    model_input["id"] = payload.get("id")
+    model_input["webhook_url"] = payload.get("webhook_url")
+    return model.predict(model_input)
 
 
 if __name__ == "__main__":
