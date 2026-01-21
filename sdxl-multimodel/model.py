@@ -235,7 +235,8 @@ class ModelManager:
         logging.info(f"Available models: {self.available_models}")
 
         # Check if we should download all models at startup
-        download_at_startup = os.getenv("DOWNLOAD_ALL_AT_STARTUP", "false").lower() == "true"
+        # Default to True unless the environment variable is explicitly set to "false"
+        download_at_startup = os.getenv("DOWNLOAD_ALL_AT_STARTUP", "").strip().lower() != "false"
 
         if download_at_startup:
             logging.info("DOWNLOAD_ALL_AT_STARTUP=true, downloading all models...")
