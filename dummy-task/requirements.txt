@@ -1,1 +1,1 @@
-runqy-task @ git+https://github.com/Publikey/runqy-python.git
+runqy-task
