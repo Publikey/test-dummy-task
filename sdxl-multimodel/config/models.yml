@@ -12,7 +12,8 @@ models:
       - type: azure
         url: https://storagesdxldev.blob.core.windows.net/models/sdxl/hassakuXLIllustrious_v21fix.safetensors
       - type: huggingface
-        url: https://huggingface.co/publikey/HassukaXLIllustrious/blob/main/hassakuXLIllustrious_v21fix.safetensors
+        url: https://huggingface.co/publikey/HassukaXLIllustrious/resolve/main/hassakuXLIllustrious_v21fix.safetensors
+        
 
   zavychromaXL9:
     filename: zavychromaxl_v100.safetensors
@@ -23,7 +24,7 @@ models:
       - type: azure
         url: https://storagesdxldev.blob.core.windows.net/models/sdxl/zavychromaxl_v100.safetensors
       - type: huggingface
-        url: https://huggingface.co/misri/zavychromaxl_v100/blob/main/zavychromaxl_v100.safetensors
+        url: https://huggingface.co/misri/zavychromaxl_v100/resolve/main/zavychromaxl_v100.safetensors
 
   anime-v1:
     filename: animagine-xl-4.0-opt.safetensors
@@ -34,7 +35,8 @@ models:
       - type: azure
         url: https://storagesdxldev.blob.core.windows.net/models/sdxl/animagine-xl-4.0-opt.safetensors
       - type: huggingface
-        url: https://huggingface.co/cagliostrolab/animagine-xl-4.0/blob/main/animagine-xl-4.0-opt.safetensors
+        url: https://huggingface.co/cagliostrolab/animagine-xl-4.0/resolve/main/animagine-xl-4.0-opt.safetensors
+        
 
   cyberrealisticpony:
     filename: cyberrealisticPony_v130.safetensors
@@ -45,7 +47,7 @@ models:
       - type: azure
         url: https://storagesdxldev.blob.core.windows.net/models/sdxl/cyberrealisticPony_v130.safetensors
       - type: huggingface
-        url: https://huggingface.co/publikey/CyberRealisticPony/blob/main/cyberrealisticPony_v130.safetensors
+        url: https://huggingface.co/publikey/CyberRealisticPony/resolve/main/cyberrealisticPony_v130.safetensors
 
   ponydiffusionxlv6:
     filename: prefectPonyXL_v50.safetensors
@@ -56,7 +58,7 @@ models:
       - type: azure
         url: https://storagesdxldev.blob.core.windows.net/models/sdxl/prefectPonyXL_v50.safetensors
       - type: huggingface
-        url: https://huggingface.co/jzli/PrefectPonyXL/blob/main/prefectPonyXL_v50.safetensors
+        url: https://huggingface.co/jzli/PrefectPonyXL/resolve/main/prefectPonyXL_v50.safetensors
 
   nova3dcgxl:
     filename: nova3DCGXL_illlustriousV50.safetensors
@@ -67,7 +69,7 @@ models:
       - type: azure
         url: https://storagesdxldev.blob.core.windows.net/models/sdxl/nova3DCGXL_illlustriousV50.safetensors
       - type: huggingface
-        url: https://huggingface.co/publikey/Nova_3DCG_XL/blob/main/nova3DCGXL_illlustriousV50.safetensors
+        url: https://huggingface.co/publikey/Nova_3DCG_XL/resolve/main/nova3DCGXL_illlustriousV50.safetensors
 
   realism_illustrious_by_stable_yogi:
     filename: realismIllustriousBy_v50FP16.safetensors
@@ -78,7 +80,7 @@ models:
       - type: azure
         url: https://storagesdxldev.blob.core.windows.net/models/sdxl/realismIllustriousBy_v50FP16.safetensors
       - type: huggingface
-        url: https://huggingface.co/publikey/Realism_Illustrious_By_Stable_Yogi/blob/main/realismIllustriousBy_v50FP16.safetensors
+        url: https://huggingface.co/publikey/Realism_Illustrious_By_Stable_Yogi/resolve/main/realismIllustriousBy_v50FP16.safetensors
 
   illustrijevo:
     filename: illustrijEVO_lvl2.safetensors
@@ -89,7 +91,7 @@ models:
       - type: azure
         url: https://storagesdxldev.blob.core.windows.net/models/sdxl/illustrijEVO_lvl2.safetensors
       - type: huggingface
-        url: https://huggingface.co/publikey/illustrijEVO/blob/main/illustrijEVO_lvl2.safetensors
+        url: https://huggingface.co/publikey/illustrijEVO/resolve/main/illustrijEVO_lvl2.safetensors
 
   novaCartoonXL:
     filename: novaCartoonXL_v40.safetensors
@@ -100,4 +102,4 @@ models:
       - type: azure
         url: https://storagesdxldev.blob.core.windows.net/models/sdxl/novaCartoonXL_v40.safetensors
       - type: huggingface
-        url: https://huggingface.co/publikey/novaCartoonXL/blob/main/novaCartoonXL_v40.safetensors
+        url: https://huggingface.co/publikey/novaCartoonXL/resolve/main/novaCartoonXL_v40.safetensors
