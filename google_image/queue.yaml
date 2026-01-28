@@ -5,11 +5,11 @@ queues:
     deployment:
       git_url: "https://github.com/Publikey/test-dummy-task.git"
       branch: "external-api-call"
-      code_path: "test-dummy-task/google_image"
+      code_path: "google_image"
       startup_cmd: "python main.py"
       mode: "long_running"
-      env_vars:
-        GOOGLE_API_KEY: "${GOOGLE_API_KEY}"
+      env_vars: {}
+        # GOOGLE_API_KEY: Set this on the worker machine directly
       startup_timeout_secs: 30
     input:
       - name: "model"

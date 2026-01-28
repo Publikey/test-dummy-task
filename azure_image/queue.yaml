@@ -5,12 +5,12 @@ queues:
     deployment:
       git_url: "https://github.com/Publikey/test-dummy-task.git"
       branch: "external-api-call"
-      code_path: "test-dummy-task/azure_image"
+      code_path: "azure_image"
       startup_cmd: "python main.py"
       mode: "long_running"
-      env_vars:
-        AZURE_OPENAI_API_KEY: "${AZURE_OPENAI_API_KEY}"
-        AZURE_OPENAI_ENDPOINT: "${AZURE_OPENAI_ENDPOINT}"
+      env_vars: {}
+        # AZURE_OPENAI_API_KEY: Set this on the worker machine directly
+        # AZURE_OPENAI_ENDPOINT: Set this on the worker machine directly
       startup_timeout_secs: 30
     input:
       - name: "model"
