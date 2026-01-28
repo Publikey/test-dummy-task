@@ -35,8 +35,24 @@ def setup():
     """Load credentials from environment variables."""
     api_key = os.environ.get("GOOGLE_API_KEY")
 
+    # Debug: print all env vars starting with GOOGLE or API
+    print("DEBUG: Environment variables:", file=sys.stderr)
+    for k, v in os.environ.items():
+        if "GOOGLE" in k.upper() or "API" in k.upper():
+            print(f"  {k}={v}", file=sys.stderr)
+
     if not api_key:
         raise ValueError("GOOGLE_API_KEY environment variable not set")
+
+    # Debug: check for common issues
+    print(f"DEBUG: Raw API key: [{api_key}]", file=sys.stderr)
+    print(f"DEBUG: API key length: {len(api_key)}", file=sys.stderr)
+    print(f"DEBUG: API key repr: {repr(api_key)}", file=sys.stderr)
+
+    api_key_stripped = api_key.strip()
+    if api_key != api_key_stripped:
+        print(f"WARNING: API key has leading/trailing whitespace!", file=sys.stderr)
+        api_key = api_key_stripped
 
     print("Google Gemini image task initialized", file=sys.stderr)
 
