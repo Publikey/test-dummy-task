@@ -4,7 +4,7 @@ queues:
     priority: 5
     deployment:
       git_url: "https://github.com/Publikey/test-dummy-task.git"
-      branch: "external-api-call"
+      branch: "master"
       code_path: "azure_image"
       startup_cmd: "python main.py"
       mode: "long_running"
