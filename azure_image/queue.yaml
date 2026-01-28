@@ -1,0 +1,72 @@
+queues:
+  # Azure OpenAI image generation (gpt-image, flux models)
+  azure-image:
+    priority: 5
+    deployment:
+      git_url: "https://github.com/Publikey/test-dummy-task.git"
+      branch: "external-api-call"
+      code_path: "test-dummy-task/azure_image"
+      startup_cmd: "python main.py"
+      mode: "long_running"
+      env_vars:
+        AZURE_OPENAI_API_KEY: "${AZURE_OPENAI_API_KEY}"
+        AZURE_OPENAI_ENDPOINT: "${AZURE_OPENAI_ENDPOINT}"
+      startup_timeout_secs: 30
+    input:
+      - name: "model"
+        type:
+          - "string"
+        required: true
+        description: "Model name: gpt-image-1.5, gpt-image-1, flux.2-pro, flux-1.1-pro"
+      - name: "prompt"
+        type:
+          - "string"
+        required: true
+        description: "Image description"
+      - name: "width"
+        type:
+          - "int"
+        required: false
+        description: "Image width in pixels (default: 1024)"
+      - name: "height"
+        type:
+          - "int"
+        required: false
+        description: "Image height in pixels (default: 1024)"
+      - name: "n"
+        type:
+          - "int"
+        required: false
+        description: "Number of images to generate (default: 1)"
+      - name: "quality"
+        type:
+          - "string"
+        required: false
+        description: "Quality level: low, medium, high"
+      - name: "output_compression"
+        type:
+          - "int"
+        required: false
+        description: "Compression level 0-100 (gpt-image models only)"
+      - name: "output_format"
+        type:
+          - "string"
+        required: false
+        description: "Output format: png, jpeg"
+    output:
+      - name: "images"
+        type:
+          - "array"
+        description: "Array of base64-encoded images"
+      - name: "revised_prompt"
+        type:
+          - "string"
+        description: "Revised prompt if available"
+      - name: "model"
+        type:
+          - "string"
+        description: "Model used"
+      - name: "provider"
+        type:
+          - "string"
+        description: "Provider name (azure)"

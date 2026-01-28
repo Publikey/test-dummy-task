@@ -1,0 +1,55 @@
+queues:
+  # Google Gemini image generation
+  google-image:
+    priority: 5
+    deployment:
+      git_url: "https://github.com/Publikey/test-dummy-task.git"
+      branch: "external-api-call"
+      code_path: "test-dummy-task/google_image"
+      startup_cmd: "python main.py"
+      mode: "long_running"
+      env_vars:
+        GOOGLE_API_KEY: "${GOOGLE_API_KEY}"
+      startup_timeout_secs: 30
+    input:
+      - name: "model"
+        type:
+          - "string"
+        required: true
+        description: "Model name: gemini-2.5-flash-image, gemini-3-pro-image-preview"
+      - name: "prompt"
+        type:
+          - "string"
+        required: true
+        description: "Image description"
+      - name: "aspect_ratio"
+        type:
+          - "string"
+        required: false
+        description: "Aspect ratio: 1:1, 2:3, 3:2, 3:4, 4:3, 4:5, 5:4, 9:16, 16:9, 21:9"
+      - name: "image_size"
+        type:
+          - "string"
+        required: false
+        description: "Image size: 1K, 2K, 4K (Pro model only)"
+    output:
+      - name: "images"
+        type:
+          - "array"
+        description: "Array of base64-encoded images"
+      - name: "revised_prompt"
+        type:
+          - "string"
+        description: "Text response from model"
+      - name: "model"
+        type:
+          - "string"
+        description: "Model used"
+      - name: "provider"
+        type:
+          - "string"
+        description: "Provider name (google)"
+      - name: "mime_type"
+        type:
+          - "string"
+        description: "Image MIME type"
