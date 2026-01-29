@@ -1,4 +1,4 @@
-runqy-task
+runqy-python
 diffusers==0.35.1
 transformers
 accelerate

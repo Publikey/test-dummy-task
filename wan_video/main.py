@@ -25,7 +25,7 @@ from transformers import (
     UMT5EncoderModel,
     T5TokenizerFast,
 )
-from runqy_task import task, load, run
+from runqy_python import task, load, run
 
 logging.basicConfig(stream=sys.stderr, level=logging.INFO)
 

@@ -22,7 +22,7 @@ from diffusers.utils import load_image
 
 from sd_embed.embedding_funcs import get_weighted_text_embeddings_sdxl
 from config import get_all_model_names, resolve_model_path, get_model_config, download_all_models
-from runqy_task import task, load, run
+from runqy_python import task, load, run
 
 MAX_SEED = np.iinfo(np.int32).max
 

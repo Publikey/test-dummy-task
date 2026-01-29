@@ -1,2 +1,2 @@
-runqy-task
+runqy-python
 requests

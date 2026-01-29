@@ -1,7 +1,7 @@
 """Dummy test task for runqy-worker."""
 
 import sys
-from runqy_task import task, load, run
+from runqy_python import task, load, run
 
 
 class DummyModel:

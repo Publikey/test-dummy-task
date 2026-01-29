@@ -1,1 +1,1 @@
-runqy-task
+runqy-python

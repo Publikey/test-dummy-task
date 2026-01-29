@@ -16,7 +16,7 @@ import sys
 import requests
 from typing import Optional, Dict, Any
 
-from runqy_task import task, load, run
+from runqy_python import task, load, run
 
 
 # Model configurations

@@ -1,6 +1,6 @@
 """Simple one-shot task for runqy-worker."""
 
-from runqy_task import task, run_once
+from runqy_python import task, run_once
 
 
 @task
