@@ -1,0 +1,81 @@
+queues:
+  # Wan2.1 FusionX video generation (I2V and T2V)
+  wan-video:
+    priority: 5
+    deployment:
+      git_url: "https://github.com/Publikey/test-dummy-task.git"
+      branch: "master"
+      code_path: "wan_video"
+      startup_cmd: "python main.py"
+      mode: "long_running"
+      env_vars: {}
+      startup_timeout_secs: 600  # Models take time to load
+    input:
+      - name: "model_name"
+        type:
+          - "string"
+        required: false
+        description: "Model name: wan21-fusionx-i2v (default), wan21-fusionx-t2v"
+      - name: "prompt"
+        type:
+          - "string"
+        required: true
+        description: "Video description"
+      - name: "negative_prompt"
+        type:
+          - "string"
+        required: false
+        description: "What to avoid in the video"
+      - name: "img_url"
+        type:
+          - "string"
+        required: false
+        description: "Input image URL (required for I2V model)"
+      - name: "width"
+        type:
+          - "int"
+        required: false
+        description: "Video width for T2V (default: 1024)"
+      - name: "height"
+        type:
+          - "int"
+        required: false
+        description: "Video height for T2V (default: 1024)"
+      - name: "num_frames"
+        type:
+          - "int"
+        required: false
+        description: "Number of frames (default: 121)"
+      - name: "fps"
+        type:
+          - "int"
+        required: false
+        description: "Frames per second (default: 18)"
+      - name: "quality"
+        type:
+          - "string"
+        required: false
+        description: "Quality: standard (6 steps), high (10 steps)"
+      - name: "id"
+        type:
+          - "string"
+        required: false
+        description: "Custom task identifier for webhook"
+      - name: "webhook_url"
+        type:
+          - "string"
+        required: false
+        description: "URL to POST results to upon completion"
+    output:
+      - name: "uuid"
+        type:
+          - "string"
+        description: "Task identifier"
+      - name: "data"
+        type:
+          - "array"
+        description: "Array of results with base64-encoded video and seed"
+      - name: "errors"
+        type:
+          - "array"
+        description: "Array of errors if any occurred"

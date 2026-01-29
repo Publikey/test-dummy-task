@@ -1,0 +1,16 @@
+runqy-task
+diffusers==0.35.1
+transformers
+accelerate
+ftfy
+opencv-python
+imageio
+imageio-ffmpeg
+sentencepiece
+peft
+gguf
+requests
+xformers
+hf_transfer
+torch
+numpy

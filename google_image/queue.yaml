@@ -8,9 +8,9 @@ queues:
       code_path: "google_image"
       startup_cmd: "python main.py"
       mode: "long_running"
-      env_vars: {}
-        # GOOGLE_API_KEY: Set this on the worker machine directly
       startup_timeout_secs: 30
+      vaults:
+        - api-keys      # ← workers get all secrets from this vault
     input:
       - name: "model"
         type:
