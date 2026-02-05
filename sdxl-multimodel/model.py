@@ -12,6 +12,7 @@ import torch
 import numpy as np
 from PIL import Image
 import gc
+from azure.storage.blob import BlobServiceClient, ContentSettings
 from diffusers import (
     StableDiffusionXLPipeline,
     StableDiffusionXLImg2ImgPipeline,
@@ -26,8 +27,11 @@ from runqy_python import task, load, run
 
 MAX_SEED = np.iinfo(np.int32).max
 
-# Default max models in CPU memory (configurable via MAX_CPU_MODELS env var)
-DEFAULT_MAX_CPU_MODELS = 3
+# === Configuration (from environment variables) ===
+MAX_CPU_MODELS = int(os.getenv("MAX_CPU_MODELS", "3"))
+DOWNLOAD_ALL_AT_STARTUP = os.getenv("DOWNLOAD_ALL_AT_STARTUP", "false").lower() == "true"
+AZURE_STORAGE_CONNECTION_STRING = os.getenv("AZURE_STORAGE_CONNECTION_STRING")
+AZURE_STORAGE_CONTAINER = os.getenv("AZURE_STORAGE_CONTAINER", "ephemeral")
 
 logging.basicConfig(stream=sys.stderr, level=logging.INFO)
 
@@ -43,6 +47,31 @@ def load_source_image(img_url: str = None, img_base64: str = None) -> Image.Imag
         image_data = base64.b64decode(img_base64)
         return Image.open(BytesIO(image_data)).convert("RGB")
     return None
+
+
+def upload_image_to_azure(
+    image: Image.Image,
+    blob_service_client: BlobServiceClient,
+    container_name: str,
+    request_uuid: str,
+    index: int
+) -> str:
+    """Upload image to Azure Blob Storage, returns the public URL."""
+    buffered = BytesIO()
+    image.save(buffered, format="JPEG", quality=95)
+    image_bytes = buffered.getvalue()
+
+    blob_name = f"{request_uuid}/{index}.jpg"
+    blob_client = blob_service_client.get_blob_client(
+        container=container_name, blob=blob_name
+    )
+    blob_client.upload_blob(
+        image_bytes,
+        blob_type="BlockBlob",
+        overwrite=True,
+        content_settings=ContentSettings(content_type="image/jpeg")
+    )
+    return blob_client.url
 
 
 def resize_image_to_dimensions(image: Image.Image, width: int, height: int) -> Image.Image:
@@ -88,8 +117,7 @@ class ModelManager:
         # LRU tracking: OrderedDict maintains insertion order, we move to end on access
         self.model_load_times = OrderedDict()
 
-        # Max models in CPU memory (configurable via env var)
-        self.max_cpu_models = int(os.getenv("MAX_CPU_MODELS", DEFAULT_MAX_CPU_MODELS))
+        self.max_cpu_models = MAX_CPU_MODELS
         logging.info(f"Max CPU models set to: {self.max_cpu_models}")
 
         # Load available models from YAML config
@@ -234,10 +262,7 @@ class ModelManager:
         logging.info(f"Lazy loading enabled. Max CPU models: {self.max_cpu_models}")
         logging.info(f"Available models: {self.available_models}")
 
-        # Check if we should download all models at startup
-        download_at_startup = os.getenv("DOWNLOAD_ALL_AT_STARTUP", "false").lower() == "true"
-
-        if download_at_startup:
+        if DOWNLOAD_ALL_AT_STARTUP:
             logging.info("DOWNLOAD_ALL_AT_STARTUP=true, downloading all models...")
             results = download_all_models()
             success_count = sum(1 for v in results.values() if v)
@@ -255,6 +280,15 @@ class Model:
         # self.model_manager = ModelManager(hf_access_token=self.hf_access_token)
         self.model_manager = ModelManager()
         self.current_model_on_gpu = self.model_manager.get_current_model_on_gpu()
+
+        # Azure Blob Storage
+        self.azure_container = AZURE_STORAGE_CONTAINER
+        if AZURE_STORAGE_CONNECTION_STRING:
+            self.blob_service_client = BlobServiceClient.from_connection_string(AZURE_STORAGE_CONNECTION_STRING)
+            logging.info(f"Azure Blob Storage initialized: container={self.azure_container}")
+        else:
+            self.blob_service_client = None
+            logging.warning("Azure not configured (AZURE_STORAGE_CONNECTION_STRING not set), using base64 fallback")
 
     def load(self):
         self.model_manager.setup_model_registry()
@@ -440,10 +474,30 @@ class Model:
                         clip_skip=clip_skip
                     ).images[0]
 
-                result_array.append({
-                    "result": self.convert_to_b64(output_image),
-                    "seed": random_seed,
-                })
+                # Upload to Azure Blob Storage if configured, otherwise fallback to base64
+                if self.blob_service_client:
+                    try:
+                        blob_url = upload_image_to_azure(
+                            output_image,
+                            self.blob_service_client,
+                            self.azure_container,
+                            uuid,
+                            i
+                        )
+                        result_array.append({"blob_url": blob_url, "seed": random_seed})
+                        logging.info(f"Uploaded to Azure: {blob_url}")
+                    except Exception as upload_err:
+                        logging.error(f"Azure upload failed: {upload_err}")
+                        result_array.append({
+                            "result": self.convert_to_b64(output_image),
+                            "seed": random_seed,
+                            "upload_error": str(upload_err)
+                        })
+                else:
+                    result_array.append({
+                        "result": self.convert_to_b64(output_image),
+                        "seed": random_seed
+                    })
             except Exception as e:
                 errors_all.append({
                     "error": str(e),

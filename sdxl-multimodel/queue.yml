@@ -1,0 +1,82 @@
+queues:
+  sdxl-multimodel:
+    priority: 5
+    deployment:
+      git_url: "https://github.com/Publikey/test-dummy-task.git"
+      branch: "master"
+      code_path: "sdxl-multimodel"
+      startup_cmd: "python model.py"
+      mode: "long_running"
+      startup_timeout_secs: 600
+      redis_storage: true
+      vaults:
+        - azure-storage
+    input:
+      - name: "model_name"
+        type: ["string"]
+        required: true
+      - name: "prompt"
+        type: ["string"]
+        required: true
+      - name: "negative_prompt"
+        type: ["string"]
+        required: false
+      - name: "width"
+        type: ["integer"]
+        required: false
+        default: 1024
+      - name: "height"
+        type: ["integer"]
+        required: false
+        default: 1024
+      - name: "num_steps"
+        type: ["integer"]
+        required: false
+        default: 28
+      - name: "guidance_scale"
+        type: ["number"]
+        required: false
+        default: 6
+      - name: "clip_skip"
+        type: ["integer"]
+        required: false
+        default: 0
+      - name: "scheduler"
+        type: ["string"]
+        required: false
+      - name: "batch_nbr"
+        type: ["integer"]
+        required: false
+        default: 1
+      - name: "seed"
+        type: ["integer"]
+        required: false
+      - name: "img_url"
+        type: ["string"]
+        required: false
+        description: "Source image URL for img2img"
+      - name: "img_base64"
+        type: ["string"]
+        required: false
+        description: "Source image as base64 for img2img"
+      - name: "strength"
+        type: ["number"]
+        required: false
+        default: 0.75
+        description: "img2img strength (0.1-1.0)"
+      - name: "webhook_url"
+        type: ["string"]
+        required: false
+        description: "URL to POST results to"
+      - name: "id"
+        type: ["string"]
+        required: false
+        description: "Request UUID"
+    output:
+      - name: "uuid"
+        type: ["string"]
+      - name: "data"
+        type: ["array"]
+        description: "Array with blob_url (or result base64 fallback) and seed"
+      - name: "errors"
+        type: ["array"]
