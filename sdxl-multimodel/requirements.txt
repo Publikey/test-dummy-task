@@ -1,21 +1,29 @@
+# Core ML packages
 diffusers==0.36.0
-transformers
-accelerate
-ftfy
-opencv-python
-imageio
-imageio-ffmpeg
-sentencepiece
-peft
-gguf
-requests
-Pillow
-hf_transfer
-protobuf
-safetensors
-fastapi
-pyyaml
-torch
+transformers==5.1.0
+accelerate==1.12.0
+peft==0.18.1
+
+# Tokenization & text
+ftfy==6.3.1
+sentencepiece==0.2.1
+
+# Image/Video processing
+opencv-python==4.13.0.92
+imageio==2.37.2
+imageio-ffmpeg==0.6.0
+
+# Model formats
+gguf==0.17.1
+
+# HuggingFace fast download
+hf_transfer==0.1.9
+
+# SD Embed (requires torch>=2.6 via optimum-quanto)
 git+https://github.com/xhinker/sd_embed.git@main
+
+# Runqy SDK
 runqy-python
-azure-storage-blob>=12.19.0
+
+# Azure storage
+azure-storage-blob==12.28.0
