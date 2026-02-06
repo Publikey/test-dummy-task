@@ -10,7 +10,7 @@ queues:
       startup_timeout_secs: 600
       redis_storage: true
       vaults:
-        - azure-storage
+        - sdxl-multimodel
     input:
       - name: "model_name"
         type: ["string"]
