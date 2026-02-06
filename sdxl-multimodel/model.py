@@ -12,7 +12,7 @@ import torch
 import numpy as np
 from PIL import Image
 import gc
-from azure.storage.blob import BlobServiceClient, ContentSettings
+from uploaders import ImageUploader, AzureProvider, UploadError
 from diffusers import (
     StableDiffusionXLPipeline,
     StableDiffusionXLImg2ImgPipeline,
@@ -48,30 +48,6 @@ def load_source_image(img_url: str = None, img_base64: str = None) -> Image.Imag
         return Image.open(BytesIO(image_data)).convert("RGB")
     return None
 
-
-def upload_image_to_azure(
-    image: Image.Image,
-    blob_service_client: BlobServiceClient,
-    container_name: str,
-    request_uuid: str,
-    index: int
-) -> str:
-    """Upload image to Azure Blob Storage, returns the public URL."""
-    buffered = BytesIO()
-    image.save(buffered, format="JPEG", quality=95)
-    image_bytes = buffered.getvalue()
-
-    blob_name = f"{request_uuid}/{index}.jpg"
-    blob_client = blob_service_client.get_blob_client(
-        container=container_name, blob=blob_name
-    )
-    blob_client.upload_blob(
-        image_bytes,
-        blob_type="BlockBlob",
-        overwrite=True,
-        content_settings=ContentSettings(content_type="image/jpeg")
-    )
-    return blob_client.url
 
 
 def resize_image_to_dimensions(image: Image.Image, width: int, height: int) -> Image.Image:
@@ -281,14 +257,13 @@ class Model:
         self.model_manager = ModelManager()
         self.current_model_on_gpu = self.model_manager.get_current_model_on_gpu()
 
-        # Azure Blob Storage
-        self.azure_container = AZURE_STORAGE_CONTAINER
+        # Image upload chain
+        self.uploader = ImageUploader()
         if AZURE_STORAGE_CONNECTION_STRING:
-            self.blob_service_client = BlobServiceClient.from_connection_string(AZURE_STORAGE_CONNECTION_STRING)
-            logging.info(f"Azure Blob Storage initialized: container={self.azure_container}")
-        else:
-            self.blob_service_client = None
-            logging.warning("Azure not configured (AZURE_STORAGE_CONNECTION_STRING not set), using base64 fallback")
+            self.uploader.add_provider(AzureProvider(AZURE_STORAGE_CONNECTION_STRING, AZURE_STORAGE_CONTAINER))
+        # Add more providers here: S3, GCS, etc.
+        if not self.uploader.providers:
+            raise RuntimeError("No upload provider configured. Set AZURE_STORAGE_CONNECTION_STRING (or another provider).")
 
     def load(self):
         self.model_manager.setup_model_registry()
@@ -474,30 +449,8 @@ class Model:
                         clip_skip=clip_skip
                     ).images[0]
 
-                # Upload to Azure Blob Storage if configured, otherwise fallback to base64
-                if self.blob_service_client:
-                    try:
-                        blob_url = upload_image_to_azure(
-                            output_image,
-                            self.blob_service_client,
-                            self.azure_container,
-                            uuid,
-                            i
-                        )
-                        result_array.append({"blob_url": blob_url, "seed": random_seed})
-                        logging.info(f"Uploaded to Azure: {blob_url}")
-                    except Exception as upload_err:
-                        logging.error(f"Azure upload failed: {upload_err}")
-                        result_array.append({
-                            "result": self.convert_to_b64(output_image),
-                            "seed": random_seed,
-                            "upload_error": str(upload_err)
-                        })
-                else:
-                    result_array.append({
-                        "result": self.convert_to_b64(output_image),
-                        "seed": random_seed
-                    })
+                image_url = self.uploader.upload(output_image, uuid, i)
+                result_array.append({"url": image_url, "seed": random_seed})
             except Exception as e:
                 errors_all.append({
                     "error": str(e),
@@ -505,7 +458,7 @@ class Model:
                     "seed": random_seed,
                 })
                 result_array.append({
-                    "result": None,
+                    "url": None,
                     "seed": random_seed,
                 })
         payload = {
@@ -528,12 +481,6 @@ class Model:
             logging.info("No webhook URL provided, skipping callback")
 
         return payload
-
-    def convert_to_b64(self, image: Image) -> str:
-        buffered = BytesIO()
-        image.save(buffered, format="JPEG")
-        img_b64 = base64.b64encode(buffered.getvalue()).decode("utf-8")
-        return img_b64
 
 
 @load
