@@ -1,4 +1,5 @@
 import logging
+import uuid
 from io import BytesIO
 from PIL import Image
 
@@ -19,12 +20,12 @@ class AzureProvider:
         self.container = container
         self.ContentSettings = ContentSettings
 
-    def upload(self, image: Image.Image, request_uuid: str, index: int) -> str:
+    def upload(self, image: Image.Image) -> str:
         buffered = BytesIO()
         image.save(buffered, format="JPEG", quality=95)
         image_bytes = buffered.getvalue()
 
-        blob_name = f"{request_uuid}/{index}.jpg"
+        blob_name = f"{uuid.uuid4()}.jpg"
         blob_client = self.blob_service_client.get_blob_client(
             container=self.container, blob=blob_name
         )
@@ -39,14 +40,14 @@ class AzureProvider:
 
 # To add a new provider, create a class with:
 #   - name: str
-#   - upload(image, request_uuid, index) -> str (returns URL)
+#   - upload(image) -> str (returns URL)
 #
 # Example:
 #
 # class S3Provider:
 #     name = "s3"
 #     def __init__(self, bucket, region, ...): ...
-#     def upload(self, image, request_uuid, index) -> str: ...
+#     def upload(self, image) -> str: ...
 
 
 class ImageUploader:
@@ -59,14 +60,14 @@ class ImageUploader:
         self.providers.append(provider)
         logger.info(f"Upload provider registered: {provider.name}")
 
-    def upload(self, image: Image.Image, request_uuid: str, index: int) -> str:
+    def upload(self, image: Image.Image) -> str:
         if not self.providers:
             raise UploadError("No upload providers configured")
 
         errors = []
         for provider in self.providers:
             try:
-                url = provider.upload(image, request_uuid, index)
+                url = provider.upload(image)
                 logger.info(f"Uploaded via {provider.name}: {url}")
                 return url
             except Exception as e:

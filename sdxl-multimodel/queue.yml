@@ -12,6 +12,10 @@ queues:
       vaults:
         - sdxl-multimodel
     input:
+      - name: "id"
+        type: ["string"]
+        required: true
+        description: "Request UUID"
       - name: "model_name"
         type: ["string"]
         required: true
@@ -22,34 +26,34 @@ queues:
         type: ["string"]
         required: false
       - name: "width"
-        type: ["integer"]
+        type: ["int"]
         required: false
         default: 1024
       - name: "height"
-        type: ["integer"]
+        type: ["int"]
         required: false
         default: 1024
       - name: "num_steps"
-        type: ["integer"]
+        type: ["int"]
         required: false
         default: 28
       - name: "guidance_scale"
-        type: ["number"]
+        type: ["float", "int"]
         required: false
         default: 6
       - name: "clip_skip"
-        type: ["integer"]
+        type: ["int"]
         required: false
         default: 0
       - name: "scheduler"
         type: ["string"]
         required: false
       - name: "batch_nbr"
-        type: ["integer"]
+        type: ["int"]
         required: false
         default: 1
       - name: "seed"
-        type: ["integer"]
+        type: ["int"]
         required: false
       - name: "img_url"
         type: ["string"]
@@ -60,7 +64,7 @@ queues:
         required: false
         description: "Source image as base64 for img2img"
       - name: "strength"
-        type: ["number"]
+        type: ["float"]
         required: false
         default: 0.75
         description: "img2img strength (0.1-1.0)"
@@ -68,12 +72,8 @@ queues:
         type: ["string"]
         required: false
         description: "URL to POST results to"
-      - name: "id"
-        type: ["string"]
-        required: false
-        description: "Request UUID"
     output:
-      - name: "uuid"
+      - name: "id"
         type: ["string"]
       - name: "data"
         type: ["array"]

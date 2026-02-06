@@ -271,49 +271,40 @@ class Model:
         return self
 
     def predict(self, model_input: Dict) -> Dict:
-        url = model_input.get("webhook_url")
-        uuid = model_input.get("id")
-
-        seed = model_input.get("seed")
+        # Required fields
+        id = model_input.get("id")
+        model_name = model_input.get("model_name")
         prompt = model_input.get("prompt")
+
+        # Optional with defaults (match queue.yml)
         negative_prompt = model_input.get("negative_prompt")
-        width = model_input.get("width")
-        height = model_input.get("height")
+        width = model_input.get("width", 1024)
+        height = model_input.get("height", 1024)
         num_steps = model_input.get("num_steps", 28)
         guidance_scale = model_input.get("guidance_scale", 6)
-        clip_skip= model_input.get("clip_skip", 0)
-        scheduler = model_input.get("scheduler", None)
+        clip_skip = model_input.get("clip_skip", 0)
+        scheduler = model_input.get("scheduler")
         batch_nbr = model_input.get("batch_nbr", 1)
-        model_name = model_input.get("model_name")
+        seed = model_input.get("seed")
 
         # img2img parameters
-        img_url = model_input.get("img_url", "")
-        img_base64 = model_input.get("img_base64", "")
+        img_url = model_input.get("img_url")
+        img_base64 = model_input.get("img_base64")
         strength = model_input.get("strength", 0.75)
-
-        # Validate and clamp strength
         strength = max(0.1, min(1.0, strength))
-
-        # Detect if this is an img2img request
         is_img2img = bool(img_url or img_base64)
 
-        logging.info(f"Received request with UUID: {uuid}")
-        logging.info(f"url: {url}") 
-        logging.info(f"Prompt: {prompt}")
-        logging.info(f"Seed: {seed}")
-        logging.info(f"Negative Prompt: {negative_prompt}")
-        logging.info(f"Width: {width}")
-        logging.info(f"Height: {height}")
-        logging.info(f"Num Steps: {num_steps}")
-        logging.info(f"Guidance Scale: {guidance_scale}")
-        logging.info(f"Clip Skip: {clip_skip}")
-        logging.info(f"Scheduler: {scheduler}")
-        logging.info(f"Batch Number: {batch_nbr}")
-        logging.info(f"Model Name: {model_name}")
-        logging.info(f"Is img2img: {is_img2img}")
+        # Optional
+        url = model_input.get("webhook_url")
+
+        logging.info(f"Received request — id: {id}, model: {model_name}")
+        logging.info(f"Prompt: {prompt}, negative: {negative_prompt}")
+        logging.info(f"Size: {width}x{height}, steps: {num_steps}, guidance: {guidance_scale}, clip_skip: {clip_skip}")
+        logging.info(f"Scheduler: {scheduler}, batch: {batch_nbr}, seed: {seed}")
         if is_img2img:
-            logging.info(f"Strength: {strength}")
-            logging.info(f"Image source: {'URL' if img_url else 'Base64'}")
+            logging.info(f"img2img — strength: {strength}, source: {'URL' if img_url else 'Base64'}")
+        if url:
+            logging.info(f"Webhook: {url}")
 
         # Get model from cache or load it (lazy loading with LRU eviction)
         model = self.model_manager.get_or_load_model(model_name)
@@ -385,7 +376,7 @@ class Model:
                 logging.error(f"Failed to load source image: {e}")
                 # Return error in webhook payload
                 payload = {
-                    "uuid": uuid,
+                    "id": id,
                     "data": [],
                     "errors": [{"error": f"Failed to load source image: {str(e)}", "batch_index": -1, "seed": None}],
                 }
@@ -449,7 +440,7 @@ class Model:
                         clip_skip=clip_skip
                     ).images[0]
 
-                image_url = self.uploader.upload(output_image, uuid, i)
+                image_url = self.uploader.upload(output_image)
                 result_array.append({"url": image_url, "seed": random_seed})
             except Exception as e:
                 errors_all.append({
@@ -462,7 +453,7 @@ class Model:
                     "seed": random_seed,
                 })
         payload = {
-            "uuid": uuid,
+            "id": id,
             "data": result_array,
             "errors": errors_all,
         }
@@ -497,11 +488,7 @@ def setup():
 def process(payload: dict, ctx: dict) -> dict:
     """Process an image generation task."""
     model = ctx["model"]
-    # Extract model_input and merge with top-level fields (id, webhook_url)
-    model_input = payload.get("model_input", {})
-    model_input["id"] = payload.get("id")
-    model_input["webhook_url"] = payload.get("webhook_url")
-    return model.predict(model_input)
+    return model.predict(payload)
 
 
 if __name__ == "__main__":
