@@ -15,6 +15,8 @@ def process(payload: dict) -> dict:
         return {"result": data.upper() if isinstance(data, str) else data}
     elif operation == "double":
         return {"result": data * 2 if isinstance(data, (int, float)) else data}
+    elif operation == "crash":
+        raise RuntimeError("intentional crash for testing")
     else:
         return {"error": f"Unknown operation: {operation}"}
 
